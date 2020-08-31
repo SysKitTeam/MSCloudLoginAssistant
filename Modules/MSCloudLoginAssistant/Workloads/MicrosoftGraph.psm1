@@ -12,38 +12,9 @@ function Connect-MSCloudLoginMicrosoftGraph
 
     if($Global:UseApplicationIdentity)
     {
-
-
-        $onAssemblyResolveEventHandler = [ResolveEventHandler]{
-            param($sender, $e)
-
-            Write-Verbose $e.Name
-            Write-Verbose "ResolveEventHandler: Attempting FullName resolution of $($e.Name)"
-            foreach($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
-                if ($assembly.FullName -eq $e.Name) {
-                    Write-Host "Successful FullName resolution of $($e.Name)"
-                    return $assembly
-                }
-            }
-
-            Write-Verbose "ResolveEventHandler: Attempting name-only resolution of $($e.Name)"
-            foreach($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
-                # Get just the name from the FullName (no version)
-                $assemblyName = $assembly.FullName.Substring(0, $assembly.FullName.IndexOf(", "))
-
-                if ($e.Name.StartsWith($($assemblyName + ","))) {
-
-                    Write-Verbose "Successful name-only (no version) resolution of $assemblyName"
-                    return $assembly
-                }
-            }
-
-            # return $null
-        }
-
         try
         {
-            [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
+            Enable-AppDomainLoadAnyVersionResolution
             if(!('Microsoft.Graph.AuthenticateRequestAsyncDelegate' -as [Type]))
             {
                 $rootDir = [System.IO.Path]::GetDirectoryName((Get-Module Microsoft.Graph.Authentication).Path).TrimEnd('\')
@@ -65,7 +36,7 @@ function Connect-MSCloudLoginMicrosoftGraph
         }
         finally
         {
-            [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
+            Disable-AppDomainLoadAnyVersionResolution
         }
 
 

@@ -933,3 +933,58 @@ function Get-PowerPlatformTokenInfo
     $TokenInfo = Receive-Job -Name $jobName
     return $TokenInfo
 }
+
+
+
+
+$onAssemblyResolveEventHandler = [ResolveEventHandler]{
+    param($sender, $e)
+
+    Write-Verbose "ResolveEventHandler: Attempting FullName resolution of $($e.Name)" 
+    foreach($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
+        if ($assembly.FullName -eq $e.Name) {
+            Write-Host "Successful FullName resolution of $($e.Name)" 
+            return $assembly
+        }
+    }
+
+    Write-Verbose "ResolveEventHandler: Attempting name-only resolution of $($e.Name)" 
+    foreach($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
+        # Get just the name from the FullName (no version)
+        $assemblyName = $assembly.FullName.Substring(0, $assembly.FullName.IndexOf(", "))
+
+        if ($e.Name.StartsWith($($assemblyName + ","))) {
+
+            Write-Verbose "Successful name-only (no version) resolution of $assemblyName" 
+            return $assembly
+        }
+    }
+                
+    return $null
+}
+
+$anyDllVersionResolutionEnabled = $false
+
+function Enable-AppDomainLoadAnyVersionResolution
+{
+    if($anyDllVersionResolutionEnabled)
+    {
+        return
+    }
+
+    $anyDllVersionResolutionEnabled = $true
+
+    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
+}
+
+
+function Disable-AppDomainLoadAnyVersionResolution
+{
+    if(!$anyDllVersionResolutionEnabled)
+    {
+        return
+    }
+
+    $anyDllVersionResolutionEnabled = $false
+    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
+}
