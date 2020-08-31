@@ -21,7 +21,7 @@ function Test-MSCloudLogin
         [Parameter(Mandatory=$true)]
         [ValidateSet("Azure","AzureAD","SharePointOnline","ExchangeOnline", `
                      "SecurityComplianceCenter","MSOnline","PnP","PowerPlatforms", `
-                     "MicrosoftTeams","SkypeForBusiness")]
+                     "MicrosoftTeams","SkypeForBusiness", "MicrosoftGraph")]
         [System.String]
         $Platform,
 
@@ -79,6 +79,10 @@ function Test-MSCloudLogin
             'ExchangeOnline'
             {
                 Connect-MSCloudLoginExchangeOnline
+            }
+            'MicrosoftGraph'
+            {
+                Connect-MSCloudLoginMicrosoftGraph
             }
             'SecurityComplianceCenter'
             {
