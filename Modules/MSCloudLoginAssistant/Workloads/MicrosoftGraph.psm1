@@ -22,6 +22,10 @@ function Connect-MSCloudLoginMicrosoftGraph
                 Add-Type -Path $graphCoreAssemblyPath
             }
 
+            # the official Connect-Graph cmdlet does not support certificates ouside the my personal store for the current user
+            # and for delegated access it only supports device code auth
+            # since we already have the authentication context that we can use to authenticate to graph
+            # we redirect it by replacing the auth implementation in runtime
             [SysKit.MsGraphAuthModulePatching.MsGraphAuthModulePatcher]::DoPatching([Microsoft.Graph.AuthenticateRequestAsyncDelegate]{
                 param(
                     [Parameter()]
@@ -39,14 +43,9 @@ function Connect-MSCloudLoginMicrosoftGraph
             Disable-AppDomainLoadAnyVersionResolution
         }
 
-
-
-
-
-
-
-      #  Add-Type -AssemblyName "C:\GitProjects\MSCloudLoginAssistant-SysKit\Modules\MSCloudLoginAssistant\Utilities\MsGrapgModuleAuthFix\MsGraphAuthModulePatcher.dll"
-
+        # we will not be using the official Connect-Graph cmdlet. 
+        # the auth process has been redirected by the code above
+        # but we do need to fill some static data just in case that Connect-Graph internally does 
         # Connect-Graph -ClientId $Global:appIdentityParams.AppId -TenantId $Global:appIdentityParams.Tenant `
         #     -CertificateThumbprint $Global:appIdentityParams.CertificateThumbprint
 
@@ -205,39 +204,11 @@ function Invoke-MSCloudLoginMicrosoftGraphAPI
         Write-Verbose -Message "Body: $Body"
     }
 
-    # the error handling with retry makes no sense, maybe retry for transient errors but this is for auth
-    # try
-    # {
-        $Result = Invoke-RestMethod @requestParams
-    # }
-    # catch
-    # {
-    #     Write-Verbose -Message $_
-    #     if ($_.Exception -like '*The remote server returned an error: (401) Unauthorized.*')
-    #     {
-    #         if ($CallCount -eq 1)
-    #         {
-    #             Write-Verbose -Message "This is the first time the method is called. Wait 10 seconds and retry the call."
-    #             Start-Sleep -Seconds 10
-    #         }
-    #         else
-    #         {
-    #             $newSleepTime = 10 * $CallCount
-    #             Write-Verbose -Message "The Access Token expired, waiting {$newSleepTime} and then regenerating a new one."
-    #             $Global:MSCloudLoginGraphAccessToken = $null
-    #         }
-    #         $CallCount++
-    #         try
-    #         {
-    #             $PSBoundParameters.Remove("CallCount") | Out-Null
-    #         }
-    #         catch
-    #         {
-    #             Write-Verbose -Message "CallCount was not already specified."
-    #         }
-    #         return (Invoke-MSCloudLoginMicrosoftGraphAPI @PSBoundParameters -CallCount $CallCount)
-    #     }
-    #     throw $_
-    # }
+    # In the original MSCloudLogin code there was error handling here that was related to  authentication
+    # the error handling with retry makes no sense, maybe retry for transient errors but this was for auth
+    # so the code was removed but this comment remains here if anybody wonders why the difference
+    
+    $Result = Invoke-RestMethod @requestParams
+    
     return $result
 }
