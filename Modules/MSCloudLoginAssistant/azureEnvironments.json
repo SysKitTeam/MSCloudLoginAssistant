@@ -10,7 +10,9 @@
         "MsGraphEndpointResourceId": "https://graph.microsoft.com",
         "AadGraphEndpointResourceId": "https://graph.windows.net",
         "SkypeForBusinessPowerShellResourceId": "https://admin4a.online.lync.com/OcsPowershellOAuth",
-        "AzureServiceManagementResourceId": "https://management.azure.com/"
+        "AzureServiceManagementResourceId": "https://management.azure.com/",
+        "ExchangeResourceId": "https://outlook.office365.com",
+        "ExchangePsConnection": "https://outlook.office365.com/PowerShell-LiveID"
       }
     },
     "AzureChinaCloud": {
