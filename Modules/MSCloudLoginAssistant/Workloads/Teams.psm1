@@ -8,14 +8,7 @@ function Connect-MSCloudLoginTeams
         if($Global:appIdentityParams.CertificateThumbprint) 
         {
             $envName = Get-PsModuleAzureEnvironmentName -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -Platform "MicrosoftTeams";
-            if(![string]::IsNullOrWhitespace($envName)) 
-            {
-                Connect-MicrosoftTeams -TenantId $Global:appIdentityParams.Tenant -ApplicationId $Global:appIdentityParams.AppId -CertificateThumbprint $Global:appIdentityParams.CertificateThumbprint -ErrorAction Stop  -TeamsEnvironmentName $envName | Out-Null
-            }
-            else
-            {
-                Connect-MicrosoftTeams -TenantId $Global:appIdentityParams.Tenant -ApplicationId $Global:appIdentityParams.AppId -CertificateThumbprint $Global:appIdentityParams.CertificateThumbprint -ErrorAction Stop | Out-Null                   
-            }            
+            Connect-MicrosoftTeams -TenantId $Global:appIdentityParams.Tenant -ApplicationId $Global:appIdentityParams.AppId -CertificateThumbprint $Global:appIdentityParams.CertificateThumbprint -ErrorAction Stop  -TeamsEnvironmentName $envName | Out-Null
         }
         else
         {

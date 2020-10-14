@@ -5,7 +5,8 @@
         "Azure": "AzureCloud",
         "AzureAD": "AzureCloud",
         "PnP": "Production",
-        "MicrosoftTeams": "TeamsCloud"        
+        "MicrosoftTeams": "TeamsCloud",
+        "PowerPlatforms": "prod"   
       },      
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.com/",
@@ -24,7 +25,9 @@
       "PsModuleEnvironmentNames": {
         "Azure": "AzureChinaCloud",
         "AzureAD": "AzureChinaCloud",
-        "PnP": "China"
+        "PnP": "China",
+        "MicrosoftTeams": "TeamsCloud",
+        "PowerPlatforms": "prod"         
       },  
       "Endpoints": {
         "ActiveDirectory": "https://login.chinacloudapi.cn/",
@@ -41,7 +44,8 @@
         "Azure": "AzureUSGovernment",
         "AzureAD": "AzureUSGovernment",
         "PnP": "UsGovernment",
-        "MicrosoftTeams": "TeamsGCCH"
+        "MicrosoftTeams": "TeamsGCCH",
+        "PowerPlatforms": "usgovhigh"   
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -59,7 +63,8 @@
         "Azure": "AzureUSGovernment",
         "AzureAD": "AzureUSGovernment",
         "PnP": "UsGovernment",
-        "MicrosoftTeams": "TeamsDOD"
+        "MicrosoftTeams": "TeamsDOD",
+        "PowerPlatforms": "dod"   
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -77,7 +82,8 @@
         "Azure": "AzureGermanyCloud",
         "AzureAD": "AzureGermanyCloud",
         "PnP": "Germany",
-        "MicrosoftTeams": "TeamsCloud"
+        "MicrosoftTeams": "TeamsCloud",
+        "PowerPlatforms": "prod"  
       },   
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.de/",
