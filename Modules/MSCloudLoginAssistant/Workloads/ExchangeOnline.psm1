@@ -86,7 +86,7 @@ function Connect-MSCloudLoginExchangeOnline
                         $Password = ConvertTo-SecureString -AsPlainText $AuthHeader -Force
                         $Ctoken = New-Object System.Management.Automation.PSCredential -ArgumentList $Global:o365Credential.UserName, $Password
                         $Global:ExchangeOnlineSession = New-PSSession -ConfigurationName Microsoft.Exchange `
-                            -ConnectionUri "$ResourceURI/PowerShell-LiveId?BasicAuthToOAuthConversion=true" `
+                            -ConnectionUri " $psConnectionUri?BasicAuthToOAuthConversion=true" `
                             -Credential $Ctoken `
                             -Authentication Basic `
                             -ErrorAction Stop `
