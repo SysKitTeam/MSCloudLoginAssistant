@@ -2,7 +2,10 @@
     "AzureCloud": {
       "Name": "AzureCloud",
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzureCloud"
+        "Azure": "AzureCloud",
+        "AzureAD": "AzureCloud",
+        "PnP": "Production",
+        "MicrosoftTeams": "TeamsCloud"        
       },      
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.com/",
@@ -19,7 +22,9 @@
     "AzureChinaCloud": {
       "Name": "AzureChinaCloud",     
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzureChinaCloud"
+        "Azure": "AzureChinaCloud",
+        "AzureAD": "AzureChinaCloud",
+        "PnP": "China"
       },  
       "Endpoints": {
         "ActiveDirectory": "https://login.chinacloudapi.cn/",
@@ -33,7 +38,10 @@
     "AzureUSGovGccHigh": {
       "Name": "AzureUSGovGccHigh",   
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzureUSGovernment"
+        "Azure": "AzureUSGovernment",
+        "AzureAD": "AzureUSGovernment",
+        "PnP": "UsGovernment",
+        "MicrosoftTeams": "TeamsGCCH"
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -48,7 +56,10 @@
     "AzureUSGovDoD": {
       "Name": "AzureUSGovDoD",   
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzureUSGovernment"
+        "Azure": "AzureUSGovernment",
+        "AzureAD": "AzureUSGovernment",
+        "PnP": "UsGovernment",
+        "MicrosoftTeams": "TeamsDOD"
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -63,7 +74,9 @@
     "AzureGermanyCloud": {
       "Name": "AzureGermanyCloud",     
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzureGermanyCloud"
+        "Azure": "AzureGermanyCloud",
+        "AzureAD": "AzureGermanyCloud",
+        "PnP": "Germany"
       },   
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.de/",
@@ -78,7 +91,9 @@
     "AzurePPE": {
       "Name": "AzurePPE",
       "PsModuleEnvironmentNames": {
-        "AzureAD": "AzurePPE"
+        "Azure": "AzurePPE",
+        "AzureAD": "AzurePPE",
+        "PnP": "PPE"
       },   
       "Endpoints": {
         "ActiveDirectory": "",
