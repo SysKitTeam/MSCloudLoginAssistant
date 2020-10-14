@@ -76,7 +76,8 @@
       "PsModuleEnvironmentNames": {
         "Azure": "AzureGermanyCloud",
         "AzureAD": "AzureGermanyCloud",
-        "PnP": "Germany"
+        "PnP": "Germany",
+        "MicrosoftTeams": "TeamsCloud"
       },   
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.de/",
