@@ -1,7 +1,7 @@
 {
     "AzureCloud": {
       "Name": "AzureCloud",
-      "PsModuleNames": {
+      "PsModuleEnvironmentNames": {
         "AzureAD": "AzureCloud"
       },      
       "Endpoints": {

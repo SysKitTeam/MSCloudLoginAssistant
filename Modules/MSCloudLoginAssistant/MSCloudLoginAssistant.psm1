@@ -1082,11 +1082,11 @@ function Get-PsModuleAzureEnvironmentName
         throw "The $AzureCloudEnvironmentName environment is not registered."
     }
 
-    if(!$Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleNames.$Platform)
+    if(!$Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleEnvironmentNames.$Platform)
     {
         throw "$AzureCloudEnvironments does not have a Ps Module name defined for the $Platform platform."
     }
 
-    return $Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleNames.$Platform
+    return $Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleEnvironmentNames.$Platform
 }
 
