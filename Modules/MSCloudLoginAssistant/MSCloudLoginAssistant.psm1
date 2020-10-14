@@ -162,7 +162,7 @@ function Get-SPORootSiteUrl
     if($Global:UseApplicationIdentity)
     {
         Write-Verbose -Message "Retrieving SharePoint Online root site url with MS graph api..."
-        
+
         $graphEndpoint = Get-AzureEnvironmentEndpoint -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -EndpointName ActiveDirectory MsGraphEndpointResourceId
         try
         {
@@ -1035,11 +1035,7 @@ function Get-AzureEnvironmentEndpoint
         $EndpointName
     )
 
-    if(!$Global:AzureCloudEnvironments)
-    {
-        $configFilePath = Join-Path -Path $PSScriptRoot -ChildPath "azureEnvironments.json"
-        $Global:AzureCloudEnvironments = Get-Content -Path $configFilePath | ConvertFrom-Json
-    }
+    Ensure-AzureCloudEnvironmentsFromConfigFile
 
     if(!$Global:AzureCloudEnvironments.$AzureCloudEnvironmentName)
     {
@@ -1053,3 +1049,44 @@ function Get-AzureEnvironmentEndpoint
 
     return $AzureCloudEnvironments.$AzureCloudEnvironmentName.Endpoints.$EndpointName
 }
+
+function Ensure-AzureCloudEnvironmentsFromConfigFile
+{
+    if(!$Global:AzureCloudEnvironments)
+    {
+        $configFilePath = Join-Path -Path $PSScriptRoot -ChildPath "azureEnvironments.json"
+        $Global:AzureCloudEnvironments = Get-Content -Path $configFilePath | ConvertFrom-Json
+    }
+}
+
+function Get-PsModuleAzureEnvironmentName
+{
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $AzureCloudEnvironmentName,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateSet("Azure","AzureAD","SharePointOnline","ExchangeOnline", `
+                     "SecurityComplianceCenter","MSOnline","PnP","PowerPlatforms", `
+                     "MicrosoftTeams","SkypeForBusiness", "MicrosoftGraph")]
+        [System.String]
+        $Platform
+    )
+
+    Ensure-AzureCloudEnvironmentsFromConfigFile
+
+    if(!$Global:AzureCloudEnvironments.$AzureCloudEnvironmentName)
+    {
+        throw "The $AzureCloudEnvironmentName environment is not registered."
+    }
+
+    if(!$Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleNames.$Platform)
+    {
+        throw "$AzureCloudEnvironments does not have a Ps Module name defined for the $Platform platform."
+    }
+
+    return $Global:AzureCloudEnvironments.$AzureCloudEnvironmentName.PsModuleNames.$Platform
+}
+

@@ -1,6 +1,9 @@
 {
     "AzureCloud": {
-      "Name": "AzureCloud",      
+      "Name": "AzureCloud",
+      "PsModuleNames": {
+        "AzureAD": "AzureCloud"
+      },      
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.com/",
         "ActiveDirectoryServiceEndpointResourceId": "https://management.core.windows.net/",
