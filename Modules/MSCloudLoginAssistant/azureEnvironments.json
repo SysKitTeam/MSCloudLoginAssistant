@@ -6,7 +6,8 @@
         "AzureAD": "AzureCloud",
         "PnP": "Production",
         "MicrosoftTeams": "TeamsCloud",
-        "PowerPlatforms": "prod"   
+        "PowerPlatforms": "prod",
+        "ExchangeOnline": "O365Default"
       },      
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.com/",
@@ -27,7 +28,8 @@
         "AzureAD": "AzureChinaCloud",
         "PnP": "China",
         "MicrosoftTeams": "TeamsCloud",
-        "PowerPlatforms": "prod"         
+        "PowerPlatforms": "prod" ,
+        "ExchangeOnline": "O365China"        
       },  
       "Endpoints": {
         "ActiveDirectory": "https://login.chinacloudapi.cn/",
@@ -46,7 +48,8 @@
         "AzureAD": "AzureUSGovernment",
         "PnP": "UsGovernment",
         "MicrosoftTeams": "TeamsGCCH",
-        "PowerPlatforms": "usgovhigh"   
+        "PowerPlatforms": "usgovhigh",
+        "ExchangeOnline": "O365USGovGCCHigh"        
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -66,7 +69,8 @@
         "AzureAD": "AzureUSGovernment",
         "PnP": "UsGovernment",
         "MicrosoftTeams": "TeamsDOD",
-        "PowerPlatforms": "dod"   
+        "PowerPlatforms": "dod",
+        "ExchangeOnline": "O365USGovDoD"
       },     
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.us/",
@@ -86,7 +90,8 @@
         "AzureAD": "AzureGermanyCloud",
         "PnP": "Germany",
         "MicrosoftTeams": "TeamsCloud",
-        "PowerPlatforms": "prod"  
+        "PowerPlatforms": "prod",
+        "ExchangeOnline": "O365GermanyCloud"
       },   
       "Endpoints": {
         "ActiveDirectory": "https://login.microsoftonline.de/",
