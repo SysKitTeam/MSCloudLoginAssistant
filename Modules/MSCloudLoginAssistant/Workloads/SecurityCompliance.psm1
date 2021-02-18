@@ -23,7 +23,8 @@ function Connect-MSCloudLoginSecurityCompliance
     [array] $sessionsToClose = $existingSessions | Where-Object -FilterScript { $_.State -ne 'Opened' }
     for ($i = 0; $i -lt $sessionsToClose.Length; $i++)
     {
-        Write-Verbose "Closing session $($sessionsToClose[$i].Name)"
+        $sessionName = $sessionsToClose[$i].Name
+        Write-Verbose "Closing remote powershell session $sessionName"
         Remove-Session $sessionsToClose[$i]
     }
     if ($activeSessions.Length -ge 1)
