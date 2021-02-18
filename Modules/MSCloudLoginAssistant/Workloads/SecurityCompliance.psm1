@@ -61,11 +61,12 @@ function Connect-MSCloudLoginSecurityCompliance
                 -AzureADAuthorizationEndpointUri $authorizationUrl `
                 -Verbose:$false -ErrorAction Stop | Out-Null
             $createdSession = $true
+            Write-Verbose -Message "Successfully connected to the Security And Compliance center"
         }
         catch
         {
             # unfortunatelly there is nothing except the error message that could uniquely identify this case, hello potential localization issues
-            $isMaxAllowedConnectionsError = $_.ErrorDetails.ToString().Contains('Fail to create a runspace because you have exceeded the maximum number of connections allowed')
+            $isMaxAllowedConnectionsError = $null -ne $_.Exception -and $_.Exception.Message.Contains('Fail to create a runspace because you have exceeded the maximum number of connections allowed')
             if (!$isMaxAllowedConnectionsError)
             {
                 throw
