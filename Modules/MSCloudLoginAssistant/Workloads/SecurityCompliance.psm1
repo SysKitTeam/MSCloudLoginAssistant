@@ -39,25 +39,55 @@ function Connect-MSCloudLoginSecurityCompliance
         return
     }
 
-    $CurrentVerbosePreference = $VerbosePreference
-    $CurrentInformationPreference = $InformationPreference
-    $CurrentWarningPreference = $WarningPreference
-    $VerbosePreference = "SilentlyContinue"
-    $InformationPreference = "SilentlyContinue"
-    $WarningPreference = "SilentlyContinue"
-    try
-    {
-        Connect-IPPSSession -Credential $Global:o365Credential `
-            -ConnectionUri $ConnectionUrl `
-            -AzureADAuthorizationEndpointUri $authorizationUrl `
-            -Verbose:$false -ErrorAction Stop | Out-Null
-    }
-    finally
-    {
-        $VerbosePreference = $CurrentVerbosePreference
-        $InformationPreference = $CurrentInformationPreference
-        $WarningPreference = $CurrentWarningPreference
-    }
 
+    $connectionTriesCounter = 0
+    $maxAttempts = 10
+    $createdSession = $false
+    do
+    {
+        $CurrentVerbosePreference = $VerbosePreference
+        $CurrentInformationPreference = $InformationPreference
+        $CurrentWarningPreference = $WarningPreference
+        $VerbosePreference = "SilentlyContinue"
+        $InformationPreference = "SilentlyContinue"
+        $WarningPreference = "SilentlyContinue"
 
+        $connectionTriesCounter++
+
+        try
+        {
+            Connect-IPPSSession -Credential $Global:o365Credential `
+                -ConnectionUri $ConnectionUrl `
+                -AzureADAuthorizationEndpointUri $authorizationUrl `
+                -Verbose:$false -ErrorAction Stop | Out-Null
+            $createdSession = $true
+        }
+        catch
+        {
+            # unfortunatelly there is nothing except the error message that could uniquely identify this case, hello potential localization issues
+            $isMaxAllowedConnectionsError = $_.ErrorDetails.ToString().Contains('Fail to create a runspace because you have exceeded the maximum number of connections allowed')
+            if (!$isMaxAllowedConnectionsError)
+            {
+                throw
+            }
+        }
+        finally
+        {
+            $VerbosePreference = $CurrentVerbosePreference
+            $InformationPreference = $CurrentInformationPreference
+            $WarningPreference = $CurrentWarningPreference
+        }
+
+        $shouldRetryConnection = !$createdSession -and $connectionTriesCounter -le $maxAttempts
+        if ($shouldRetryConnection)
+        {
+            Write-Information "[$connectionTriesCounter/$maxAttempts] Too many existing workspaces. Waiting an additional 60 seconds for sessions to free up."
+            Start-Sleep -Seconds 60
+        }
+    } while ($shouldRetryConnection)
+
+    if (!$createdSession)
+    {
+        throw "The maximum retry attempt to create a Security And Complinace connection has been exceeded."
+    }
 }
