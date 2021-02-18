@@ -30,109 +30,52 @@ function Connect-MSCloudLoginSkypeForBusiness
         return
     }
 
-    $existingSessions = Get-PSSession | Where-Object -FilterScript { $_.Name -like 'SfBPowerShellSession*' }
-    [array]$activeSessions = $existingSessions | Where-Object -FilterScript { $_.State -eq 'Opened' }
-    [array] $sessionsToClose = $existingSessions | Where-Object -FilterScript { $_.State -ne 'Opened' }
-    for ($i = 0; $i -lt $sessionsToClose.Length; $i++)
-    {
-        $sessionName = $sessionsToClose[$i].Name
-        Write-Verbose "Closing remote powershell session $sessionName"
-        Remove-Session $sessionsToClose[$i]
+
+    # Skype for Business actually has a cool cmdlet inside of the MicrosoftTeams module named New-CsOnlineSession
+    # unfortunately I could not get it to work with the application identity so we remain like this
+    # There is probably a way to achieve it with the application identity but I do not want to risk breaking things, atleast for the time being
+    # hope to revisit it in the future
+
+    $maxConnectionsSearchString = "The maximum number of concurrent shells"
+    
+    Ensure-RemotePsSession -RemoteSessionName "Skype For Business" `
+        -TestModuleLoadedCommand "Get-CsTeamsClientConfiguration" `
+        -MaxConnectionsMessageSearchString $maxConnectionsSearchString `
+        -ExistingSessionPredicate { $_.Name -like 'SfBPowerShellSession*' } `
+        -MaxAttempts 15 `
+        -CreateSessionScriptBlock {
+
+        $ErrorActionPreference = "Stop"
+
+        $targetUri = Get-SkypeForBusinessServiceEndpoint -TargetDomain $adminDomain
+
+        # we don't call Get-SkypeForBusinessAccessInfo
+        # in the application identity use case we have our own clientId
+        # disregarded the $authuri for now since it would mean that the authentication context would not be global any more
+        $AccessToken = Get-OnBehalfOfAccessToken -TargetUri $targetUri -UserPrincipalName $userprincipalNameToUse
+
+        $networkCreds = [System.Net.NetworkCredential]::new("", $AccessToken)
+        $secPassword = $networkCreds.SecurePassword
+        $user = "oauth"
+        $cred = [System.Management.Automation.PSCredential]::new($user, $secPassword)
+
+        $queryStr = "AdminDomain=$adminDomain"
+
+        $ConnectionUri = [UriBuilder]$targetUri
+        $ConnectionUri.Query = $queryStr
+
+        $psSessionName = "SfBPowerShellSession"
+        $ConnectorVersion = "7.0.2374.2"
+        $SessionOption = New-PsSessionOption
+        $SessionOption.ApplicationArguments = @{}
+        $SessionOption.ApplicationArguments['X-MS-Client-Version'] = $ConnectorVersion
+        $SessionOption.NoMachineProfile = $true
+
+
+        # leaving the global variables just in case some cmdlet uses them
+        $Global:SkypeSession = New-PSSession -Name $psSessionName -ConnectionUri $ConnectionUri.Uri `
+            -Credential $cred -Authentication Basic -SessionOption $SessionOption
+        $Global:SkypeModule = Import-PSSession $Global:SkypeSession
+        Import-Module $Global:SkypeModule -Global | Out-Null
     }
-
-    if ($activeSessions.Length -ge 1)
-    {
-        #  Write-Verbose -Message "Found {$($activeSessions.Length)} existing Security and Compliance Session"
-        $command = Get-Command "Get-CsTeamsClientConfiguration" -ErrorAction 'SilentlyContinue'
-        if ($null -ne $command)
-        {
-            return
-        }
-
-        $sfbModule = Import-PSSession $activeSessions[0] -DisableNameChecking -AllowClobber
-        Import-Module $sfbModule -Global | Out-Null
-        return
-    }
-
-    $connectionTriesCounter = 0
-    $maxAttempts = 10
-    $createdSession = $false
-    $CurrentVerbosePreference = $VerbosePreference
-    $CurrentInformationPreference = $InformationPreference
-    $CurrentWarningPreference = $WarningPreference
-    do
-    {
-        $connectionTriesCounter++
-
-        try
-        {
-            Write-Verbose "Creating a new Session to Skype for Business Servers"
-            $ErrorActionPreference = "Stop"
-
-            $targetUri = Get-SkypeForBusinessServiceEndpoint -TargetDomain $adminDomain
-
-            # we don't call Get-SkypeForBusinessAccessInfo
-            # in the application identity use case we have our own clientId
-            # disregarded the $authuri for now since it would mean that the authentication context would not be global any more
-            $AccessToken = Get-OnBehalfOfAccessToken -TargetUri $targetUri -UserPrincipalName $userprincipalNameToUse
-
-            $networkCreds = [System.Net.NetworkCredential]::new("", $AccessToken)
-            $secPassword = $networkCreds.SecurePassword
-            $user = "oauth"
-            $cred = [System.Management.Automation.PSCredential]::new($user, $secPassword)
-
-            $queryStr = "AdminDomain=$adminDomain"
-
-            $ConnectionUri = [UriBuilder]$targetUri
-            $ConnectionUri.Query = $queryStr
-
-            $psSessionName = "SfBPowerShellSession"
-            $ConnectorVersion = "7.0.2374.2"
-            $SessionOption = New-PsSessionOption
-            $SessionOption.ApplicationArguments = @{}
-            $SessionOption.ApplicationArguments['X-MS-Client-Version'] = $ConnectorVersion
-            $SessionOption.NoMachineProfile = $true
-
-
-            $VerbosePreference = "SilentlyContinue"
-            $InformationPreference = "SilentlyContinue"
-            $WarningPreference = "SilentlyContinue"
-
-            $Global:SkypeSession = New-PSSession -Name $psSessionName -ConnectionUri $ConnectionUri.Uri `
-                -Credential $cred -Authentication Basic -SessionOption $SessionOption
-            $Global:SkypeModule = Import-PSSession $Global:SkypeSession
-            Import-Module $Global:SkypeModule -Global | Out-Null
-
-            $createdSession = $true
-            Write-Verbose "Created a new Session to Skype for Business Servers"
-        }
-        catch
-        {
-            # unfortunatelly there is nothing except the error message that could uniquely identify this case, hello potential localization issues
-            $isMaxAllowedConnectionsError = $null -ne $_.Exception -and $_.Exception.Message.Contains('The maximum number of concurrent shells')
-            if (!$isMaxAllowedConnectionsError)
-            {
-                throw
-            }
-        }
-        finally
-        {
-            $VerbosePreference = $CurrentVerbosePreference
-            $InformationPreference = $CurrentInformationPreference
-            $WarningPreference = $CurrentWarningPreference
-        }
-
-        $shouldRetryConnection = !$createdSession -and $connectionTriesCounter -le $maxAttempts
-        if ($shouldRetryConnection)
-        {
-            Write-Information "[$connectionTriesCounter/$maxAttempts] Too many existing workspaces. Waiting an additional 70 seconds for sessions to free up."
-            Start-Sleep -Seconds 70
-        }
-    } while ($shouldRetryConnection)
-
-    if (!$createdSession)
-    {
-        throw "The maximum retry attempt to create a Security And Complinace connection has been exceeded."
-    }
-
 }
