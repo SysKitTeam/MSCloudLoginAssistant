@@ -42,38 +42,69 @@ function Connect-MSCloudLoginExchangeOnline
             -not [String]::IsNullOrEmpty($TenantId) -and `
             -not [String]::IsNullOrEmpty($CertificateThumbprint))
     {
-        Write-Verbose -Message "Attempting to connect to Exchange Online using AAD App {$ApplicationID}"
-        try
+        $Organization = Get-MSCloudLoginOrganizationName -ApplicationId $ApplicationId `
+            -TenantId $TenantId `
+            -CertificateThumbprint $CertificateThumbprint
+        $connectionTriesCounter = 0
+        $maxAttempts = 10
+        $createdSession = $false
+        do
         {
-            $Organization = Get-MSCloudLoginOrganizationName -ApplicationId $ApplicationId `
-                -TenantId $TenantId `
-                -CertificateThumbprint $CertificateThumbprint
             $CurrentVerbosePreference = $VerbosePreference
             $CurrentInformationPreference = $InformationPreference
             $CurrentWarningPreference = $WarningPreference
             $VerbosePreference = "SilentlyContinue"
             $InformationPreference = "SilentlyContinue"
             $WarningPreference = "SilentlyContinue"
-            Connect-ExchangeOnline -AppId $ApplicationId `
-                -Organization $Organization `
-                -CertificateThumbprint $CertificateThumbprint `
-                -ShowBanner:$false `
-                -ShowProgress:$false `
-                -ConnectionUri $psConnectionUri `
-                -AzureADAuthorizationEndpointUri $AuthorizationUrl `
-                -ExchangeEnvironmentName $ExoEnvName `
-                -Verbose:$false | Out-Null
-            $VerbosePreference = $CurrentVerbosePreference
-            $InformationPreference = $CurrentInformationPreference
-            $WarningPreference = $CurrentWarningPreference
-            Write-Verbose -Message "Successfully connected to Exchange Online using AAD App {$ApplicationID}"
-        }
-        catch
+
+            $connectionTriesCounter++
+
+            try
+            {
+                Write-Verbose -Message "Attempting to connect to Exchange Online using AAD App {$ApplicationID}"
+                Connect-ExchangeOnline -AppId $ApplicationId `
+                    -Organization $Organization `
+                    -CertificateThumbprint $CertificateThumbprint `
+                    -ShowBanner:$false `
+                    -ShowProgress:$false `
+                    -ConnectionUri $psConnectionUri `
+                    -AzureADAuthorizationEndpointUri $AuthorizationUrl `
+                    -ExchangeEnvironmentName $ExoEnvName `
+                    -Verbose:$false | Out-Null
+                $createdSession = $true
+                Write-Verbose -Message "Successfully connected to Exchange Online using AAD App {$ApplicationID}"
+            }
+            catch
+            {
+                # unfortunatelly there is nothing except the error message that could uniquely identify this case, hello potential localization issues
+                $isMaxAllowedConnectionsError = $null -ne $_.Exception -and $_.Exception.Message.Contains('Fail to create a runspace because you have exceeded the maximum number of connections allowed')
+                if (!$isMaxAllowedConnectionsError)
+                {
+                    throw
+                }
+            }
+            finally
+            {
+                $VerbosePreference = $CurrentVerbosePreference
+                $InformationPreference = $CurrentInformationPreference
+                $WarningPreference = $CurrentWarningPreference
+            }
+
+            $shouldRetryConnection = !$createdSession -and $connectionTriesCounter -le $maxAttempts
+            if ($shouldRetryConnection)
+            {
+                Write-Information "[$connectionTriesCounter/$maxAttempts] Too many existing workspaces. Waiting an additional 60 seconds for sessions to free up."
+                Start-Sleep -Seconds 60
+            }
+        } while ($shouldRetryConnection)
+
+        if (!$createdSession)
         {
-            throw $_
+            throw "The maximum retry attempt to create a EXO managment connection has been exceeded."
         }
     }
     else
     {
+        throw "Connecting without an application identity is not supported"
     }
 }
