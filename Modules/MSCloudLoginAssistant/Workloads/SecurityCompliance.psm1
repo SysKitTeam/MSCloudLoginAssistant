@@ -82,8 +82,8 @@ function Connect-MSCloudLoginSecurityCompliance
         $shouldRetryConnection = !$createdSession -and $connectionTriesCounter -le $maxAttempts
         if ($shouldRetryConnection)
         {
-            Write-Information "[$connectionTriesCounter/$maxAttempts] Too many existing workspaces. Waiting an additional 60 seconds for sessions to free up."
-            Start-Sleep -Seconds 60
+            Write-Information "[$connectionTriesCounter/$maxAttempts] Too many existing workspaces. Waiting an additional 70 seconds for sessions to free up."
+            Start-Sleep -Seconds 70
         }
     } while ($shouldRetryConnection)
 
