@@ -7,8 +7,6 @@ function Connect-MSCloudLoginSecurityCompliance
         throw "The SecurityComplianceCenter Platform does not support connecting with application identity."
     }
 
-
-
     $WarningPreference = 'SilentlyContinue'
     $ProgressPreference = 'SilentlyContinue'
     $InformationPreference = 'Continue'
@@ -18,6 +16,7 @@ function Connect-MSCloudLoginSecurityCompliance
     $uriObj = [Uri]::new($ConnectionUrl)
     $scHost = $uriObj.Host
 
+    
     $maxConnectionsSearchString = "Fail to create a runspace because you have exceeded the maximum number of connections allowed"
     
     Ensure-RemotePsSession -RemoteSessionName "Security and Compliance" `
