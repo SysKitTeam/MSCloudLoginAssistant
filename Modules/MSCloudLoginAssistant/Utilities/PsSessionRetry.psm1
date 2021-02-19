@@ -1,26 +1,26 @@
 function Ensure-RemotePsSession
 {
-    [CmdletBinding()]   
+    [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]        
+        [Parameter(Mandatory = $true)]
         $RemoteSessionName,
 
-        [Parameter(Mandatory = $true)]        
+        [Parameter(Mandatory = $true)]
         $TestModuleLoadedCommand,
 
-        [Parameter(Mandatory = $true)]        
+        [Parameter(Mandatory = $true)]
         $MaxConnectionsMessageSearchString,
 
-        [Parameter(Mandatory = $true)]        
+        [Parameter(Mandatory = $true)]
         [ScriptBlock]
         $CreateSessionScriptBlock,
 
-        [Parameter(Mandatory = $true)]        
+        [Parameter(Mandatory = $true)]
         [ScriptBlock]
         $ExistingSessionPredicate,
 
-        [Parameter()]        
+        [Parameter()]
         [int]
         $MaxAttempts = 12
     )
@@ -34,7 +34,7 @@ function Ensure-RemotePsSession
         Remove-Session $sessionsToClose[$i]
     }
     if ($activeSessions.Length -ge 1)
-    {        
+    {
         $command = Get-Command $TestModuleLoadedCommand -ErrorAction 'SilentlyContinue'
         if ($null -ne $command)
         {
@@ -46,7 +46,7 @@ function Ensure-RemotePsSession
     }
 
 
-    $connectionTriesCounter = 0   
+    $connectionTriesCounter = 0
     $createdSession = $false
     do
     {
@@ -62,7 +62,7 @@ function Ensure-RemotePsSession
         try
         {
             Write-Verbose -Message "Attempting to create a remote session for $RemoteSessionName"
-            Invoke-Command $CreateSessionScriptBlock            
+            Invoke-Command $CreateSessionScriptBlock
             $createdSession = $true
             Write-Verbose -Message "Successfully connected to $RemoteSessionName"
         }

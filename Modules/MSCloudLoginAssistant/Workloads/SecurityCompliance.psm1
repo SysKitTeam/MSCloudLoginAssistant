@@ -16,17 +16,41 @@ function Connect-MSCloudLoginSecurityCompliance
     $uriObj = [Uri]::new($ConnectionUrl)
     $scHost = $uriObj.Host
 
-    
     $maxConnectionsSearchString = "Fail to create a runspace because you have exceeded the maximum number of connections allowed"
-    
+
     Ensure-RemotePsSession -RemoteSessionName "Security and Compliance" `
         -TestModuleLoadedCommand "Get-ComplianceSearch" `
         -MaxConnectionsMessageSearchString $maxConnectionsSearchString `
         -ExistingSessionPredicate { ($_.ComputerName -like '*.ps.compliance.protection*' -or $_.ComputerName -like "*$scHost*" ) } `
         -CreateSessionScriptBlock {
-        Connect-IPPSSession -Credential $Global:o365Credential `
+
+        # for some reason this hangs in Trace, leaving as a reminder
+        # Connect-ExchangeOnline  -Credential $Global:o365Credential `
+        #     -ShowBanner:$false `
+        #     -ShowProgress:$false `
+        #     -ConnectionUri $ConnectionUrl `
+        #     -AzureADAuthorizationEndpointUri $authorizationUrl `
+        #     -Verbose:$false | Out-Null
+
+        # Connect-IPPSSession -Credential $Global:o365Credential `
+        #     -ConnectionUri $ConnectionUrl `
+        #     -AzureADAuthorizationEndpointUri $authorizationUrl `
+        #     -
+        #     -Verbose:$false -ErrorAction Stop | Out-Null
+
+
+        $session = New-PSSession -ConfigurationName "Microsoft.Exchange" `
             -ConnectionUri $ConnectionUrl `
-            -AzureADAuthorizationEndpointUri $authorizationUrl `
-            -Verbose:$false -ErrorAction Stop | Out-Null
+            -Credential $O365Credential `
+            -Authentication Basic `
+            -ErrorAction Stop `
+            -AllowRedirection
+
+
+        $module = Import-PSSession $session  `
+            -ErrorAction SilentlyContinue `
+            -AllowClobber
+
+        Import-Module $module -Global | Out-Null
     }
 }
