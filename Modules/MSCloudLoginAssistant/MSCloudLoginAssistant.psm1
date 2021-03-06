@@ -21,7 +21,7 @@ function Test-MSCloudLogin
         [Parameter(Mandatory = $true)]
         [ValidateSet("Azure", "AzureAD", "SharePointOnline", "ExchangeOnline", `
                 "SecurityComplianceCenter", "MSOnline", "PnP", "PowerPlatforms", `
-                "MicrosoftTeams", "SkypeForBusiness", "MicrosoftGraph")]
+                "MicrosoftTeams", "SkypeForBusiness", "MicrosoftGraph", "Intune")]
         [System.String]
         $Platform,
 
@@ -82,6 +82,11 @@ function Test-MSCloudLogin
             }
             'MicrosoftGraph'
             {
+                Connect-MSCloudLoginMicrosoftGraph
+            }
+            'Intune'
+            {
+                # Intune is just going to the graph under the hood
                 Connect-MSCloudLoginMicrosoftGraph
             }
             'SecurityComplianceCenter'
