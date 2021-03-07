@@ -85,9 +85,8 @@ function Test-MSCloudLogin
                 Connect-MSCloudLoginMicrosoftGraph
             }
             'Intune'
-            {
-                # Intune is just going to the graph under the hood
-                Connect-MSCloudLoginMicrosoftGraph
+            {                
+                Connect-MSCloudLoginIntune
             }
             'SecurityComplianceCenter'
             {
