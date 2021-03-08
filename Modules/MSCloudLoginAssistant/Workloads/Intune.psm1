@@ -23,11 +23,9 @@ function Connect-MSCloudLoginIntune
                 Add-Type -Path $intunePsSdkPath
             }
             
-
-            # the official Connect-Graph cmdlet does not support certificates ouside the my personal store for the current user
-            # and for delegated access it only supports device code auth
-            # since we already have the authentication context that we can use to authenticate to graph
-            # we redirect it by replacing the auth implementation in runtime
+            # the official Connect-MSGraph cmdlet does not support Application Identity auth, it's not implemented even though there are signs that it was considered
+            # since we already have our authentication context we can that use to authenticate to graph with the application identity
+            # unfortunately there is a bit of hacking involved by dynamically patching some methods in the Intune PowerShell SDK dll
             [SysKit.MsGraphAuthModulePatching.MsGraphIntuneAuthModulePatcher]::DoPatching([SysKit.MsGraphAuthModulePatching.MsGraphIntuneAuthDelegate] {
                     $graphEndpoint = Get-AzureEnvironmentEndpoint -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -EndpointName MsGraphEndpointResourceId
                     $authResult = Get-AppIdentityAuthResult -TargetUri $graphEndpoint
