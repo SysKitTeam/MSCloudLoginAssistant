@@ -70,8 +70,26 @@ function Ensure-RemotePsSession
         {
             # unfortunatelly there is nothing except the error message that could uniquely identify this case, hello potential localization issues
             $isMaxAllowedConnectionsError = $null -ne $_.Exception -and $_.Exception.Message.Contains($MaxConnectionsMessageSearchString)
+
             if (!$isMaxAllowedConnectionsError)
             {
+                if ($null -ne $_.Exception -and $null -ne $_.Exception.InnerException -and $null -ne $_.Exception.InnerException.InnerExceptions)
+                {
+                    Write-Error $([string]$_.Exception.InnerException.InnerExceptions)
+                }
+                elseif ($null -ne $_.Exception -and $null -ne $_.Exception.InnerException)
+                {
+                    Write-Error $([string]$_.Exception.InnerException)
+                }
+                elseif ($null -ne $_.Exception)
+                {
+                    Write-Error $([string]$_.Exception)
+                }
+                else
+                {
+                    Write-Error $_
+                }
+
                 throw
             }
         }
