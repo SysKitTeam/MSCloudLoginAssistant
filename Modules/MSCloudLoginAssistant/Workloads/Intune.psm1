@@ -7,11 +7,11 @@ function Connect-MSCloudLoginIntune
 
     if (!(Get-Module Microsoft.Graph.Intune))
     {
-        Import-Module -Name Microsoft.Graph.Intune -DisableNameChecking -Force | out-null
+        Import-Module -Name Microsoft.Graph.Intune -DisableNameChecking -Force | Out-Null
     }
 
     if ($Global:UseApplicationIdentity)
-    {       
+    {
         try
         {
             Enable-AppDomainLoadAnyVersionResolution
@@ -21,16 +21,22 @@ function Connect-MSCloudLoginIntune
                 $intunePsSdkPath = $rootDir + "\bin\Microsoft.Intune.PowerShellGraphSDK.dll"
                 Add-Type -Path $intunePsSdkPath
             }
-            
+
             $authorizationUrl = Get-AzureEnvironmentEndpoint -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -EndpointName ActiveDirectory
             $authorizationUrl += "common"
             $graphEndpoint = Get-AzureEnvironmentEndpoint -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -EndpointName MsGraphEndpointResourceId
+
+            $schemaVersion = "v1.0"
+            if ($Global:appIdentityParams.AzureCloudEnvironmentName -eq 'AzureUSGovGccHigh' -or $Global:appIdentityParams.AzureCloudEnvironmentName -eq 'AzureUSGovDoD')
+            {
+                $schemaVersion = "beta"
+            }
 
             # the official Connect-MSGraph cmdlet does not support Application Identity auth with a certificate, it's not implemented even though there are signs that it was considered
             # since we already have our authentication context we can that use to authenticate to graph with the application identity
             # unfortunately there is a bit of hacking involved by dynamically patching some methods in the Intune PowerShell SDK dll
             [SysKit.MsGraphAuthModulePatching.MsGraphIntuneAuthModulePatcher]::DoPatching([SysKit.MsGraphAuthModulePatching.MsGraphIntuneAuthDelegate] {
-                    
+
                     #repeating just in case
                     $graphEndpoint = Get-AzureEnvironmentEndpoint -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -EndpointName MsGraphEndpointResourceId
                     $authResult = Get-AppIdentityAuthResult -TargetUri $graphEndpoint
@@ -41,8 +47,8 @@ function Connect-MSCloudLoginIntune
                     $result.AccessToken = $authResult.AccessToken
                     $result.ExpiresOn = $authResult.ExpiresOn
 
-                    return $result                    
-                }, $graphEndpoint, $authorizationUrl)
+                    return $result
+                }, $graphEndpoint, $authorizationUrl, $schemaVersion)
         }
         finally
         {
