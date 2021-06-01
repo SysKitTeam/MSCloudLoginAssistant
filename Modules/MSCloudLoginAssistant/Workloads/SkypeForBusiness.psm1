@@ -1,3 +1,6 @@
+# this is constant between different clouds
+$sfbAndTeamsAdminResourceGuidId = "48ac35b8-9aa8-4d74-927d-1f4a14a0b239"
+
 function Connect-MSCloudLoginSkypeForBusiness
 {
     [CmdletBinding()]
@@ -20,7 +23,7 @@ function Connect-MSCloudLoginSkypeForBusiness
 
     # patching is performed via a custom dll that uses Harmony to change the auth behaviour
     [SysKit.MsGraphAuthModulePatching.MsTeamsModulePatcher]::DoPatching([SysKit.MsGraphAuthModulePatching.MsTeamsAuthDelegate] {
-            $authResult = Get-OnBehalfOfAuthResult -TargetUri "48ac35b8-9aa8-4d74-927d-1f4a14a0b239" -UserPrincipalName $userprincipalNameToUse
+            $authResult = Get-OnBehalfOfAuthResult -TargetUri $sfbAndTeamsAdminResourceGuidId -UserPrincipalName $userprincipalNameToUse
             $result = New-Object 'SysKit.MsGraphAuthModulePatching.MsTeamsAuthResult'
 
             $teamsEnvironmentName = Get-PsModuleAzureEnvironmentName -AzureCloudEnvironmentName $Global:appIdentityParams.AzureCloudEnvironmentName -Platform "MicrosoftTeams"
